@@ -1,19 +1,18 @@
 import { AppRepository } from './app.repository';
-import { Observable, from, mergeMap } from 'rxjs';
 import { createClient, RedisClientType } from 'redis';
  
 export class AppRepositoryRedis implements AppRepository {
   private readonly redisClient: RedisClientType;
  
   constructor() {
-    const host = process.env.REDIS_HOST || 'redis';
+    const host = process.env.REDIS_HOST || 'localhost';
     const port = +process.env.REDIS_PORT || 6379;
     this.redisClient = createClient({
       url: `redis://${host}:${port}`,
     });
-    from(this.redisClient.connect()).subscribe({ error: console.error });
+    this.redisClient.on('error', err => console.log('Redis Client Error', err));
     this.redisClient.on('connect', () => console.log('Redis connected'));
-    this.redisClient.on('error', console.error);
+    this.redisClient.connect();
   }
  
   async get(hash: string): Promise<string>{
@@ -21,7 +20,7 @@ export class AppRepositoryRedis implements AppRepository {
   }
  
   async put(hash: string, url: string): Promise<string> {
-    return this.redisClient.set(hash, url)
-    .then(() => this.redisClient.get(hash))
+    return await this.redisClient.set(hash, url)
+    
   }
 }

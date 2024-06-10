@@ -8,8 +8,8 @@ export class AppService {
     @Inject(AppRepositoryTag) private readonly appRepository: AppRepository
   ){}
 
-  getHello(): string {
-    return 'Hello World!';
+  getAll(): string {
+    return this.appRepository.getAll();
   }
 
   async shortenUrl(url: string): Promise<string>{
@@ -18,7 +18,8 @@ export class AppService {
       await this.appRepository.put(hash, url); 
       return hash;
     } catch (error) {
-      return error;
+      console.log(error);
+      return error
     }
   }
 
